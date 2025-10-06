@@ -707,6 +707,15 @@ export class WebServer {
             
             <div class="card">
               <h2>🔗 Integrations</h2>
+              <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 14px;">
+                <strong>🔄 Auto-Refresh Schedule:</strong>
+                <ul style="margin: 5px 0; padding-left: 20px;">
+                  <li>Token Refresh: Every 30 minutes</li>
+                  <li>Data Sync: Every hour</li>
+                  <li>Health Check: Every 5 minutes</li>
+                </ul>
+                <small style="color: #666;">⏱️ Live countdown timers update every second</small>
+              </div>
               <button class="btn" onclick="loadIntegrations()">Refresh</button>
               <div id="integrations"></div>
             </div>
@@ -887,20 +896,36 @@ export class WebServer {
                 const response = await fetch(\`/api/integrations?accountId=\${currentIntegrationId}\`);
                 const data = await response.json();
                 
-                let html = '<table><tr><th>ID</th><th>Project</th><th>Status</th><th>Last Refresh</th><th>Expires At</th><th>Actions</th></tr>';
+                let html = '<table><tr><th>ID</th><th>Project</th><th>Status</th><th>Last Refresh</th><th>Next Refresh</th><th>Actions</th></tr>';
                 
                 data.integrations.forEach(integration => {
                   const status = integration.is_active ? 'Active' : 'Inactive';
                   const lastRefresh = integration.last_refresh_at ? new Date(integration.last_refresh_at).toLocaleString() : 'Never';
                   const expiresAt = integration.expires_at ? new Date(integration.expires_at).toLocaleString() : 'Unknown';
-                  const timeUntilExpiry = integration.expires_at ? Math.round((new Date(integration.expires_at) - new Date()) / (1000 * 60 * 60)) : 0;
                   
+                  // Calculate next scheduled refresh based on 30-minute intervals from last refresh
                   let expiryStatus;
-                  if (timeUntilExpiry > 0) {
-                    const color = timeUntilExpiry < 2 ? 'red' : timeUntilExpiry < 24 ? 'orange' : 'green';
-                    expiryStatus = '<span style="color: ' + color + '">' + timeUntilExpiry + 'h</span>';
+                  let nextRefreshTime;
+                  
+                  if (integration.last_refresh_at) {
+                    const lastRefreshDate = new Date(integration.last_refresh_at);
+                    const lastRefreshMs = lastRefreshDate.getTime();
+                    const refreshIntervalMs = 30 * 60 * 1000; // 30 minutes in milliseconds
+                    
+                    // Calculate the next scheduled refresh time
+                    let nextScheduledRefresh = new Date(lastRefreshMs + refreshIntervalMs);
+                    
+                    // If the next scheduled refresh is in the past, find the next upcoming 30-minute interval
+                    const now = new Date();
+                    while (nextScheduledRefresh <= now) {
+                      nextScheduledRefresh = new Date(nextScheduledRefresh.getTime() + refreshIntervalMs);
+                    }
+                    
+                    expiryStatus = '<span id="countdown-' + integration.id + '" data-last-refresh-ms="' + lastRefreshMs + '" style="color: green">⏱️ Calculating...</span>';
+                    nextRefreshTime = nextScheduledRefresh.toLocaleString();
                   } else {
-                    expiryStatus = '<span style="color: red">Expired</span>';
+                    expiryStatus = '<span style="color: gray">No refresh data</span>';
+                    nextRefreshTime = 'Unknown';
                   }
                   
                   html += \`<tr>
@@ -908,7 +933,7 @@ export class WebServer {
                     <td>\${integration.project_id}</td>
                     <td>\${status}</td>
                     <td>\${lastRefresh}</td>
-                    <td>\${expiresAt}<br><small>\${expiryStatus}</small></td>
+                    <td>\${nextRefreshTime}<br><small>\${expiryStatus}</small></td>
                     <td>
                       <button class="btn" onclick="refreshToken(\${integration.id})">🔄 Refresh Token</button>
                       <button class="btn" onclick="syncIntegration(\${integration.id})">Quick Sync</button>
@@ -1094,6 +1119,65 @@ export class WebServer {
             
             // Load current account and account-specific data on page load
             loadCurrentAccount();
+            
+            // Start live countdown timer
+            setInterval(updateLiveCountdowns, 1000); // Update every second for live countdown
+            setInterval(updateTokenCountdown, 30000); // Update data every 30 seconds
+            
+            function updateLiveCountdowns() {
+              // Update all countdown elements without rebuilding the table
+              const countdownElements = document.querySelectorAll('[id^="countdown-"]');
+              
+              countdownElements.forEach(element => {
+                const lastRefreshMs = parseInt(element.getAttribute('data-last-refresh-ms'));
+                if (lastRefreshMs) {
+                  const now = new Date().getTime();
+                  const refreshIntervalMs = 30 * 60 * 1000; // 30 minutes
+                  
+                  // Calculate next scheduled refresh
+                  let nextScheduledRefresh = new Date(lastRefreshMs + refreshIntervalMs);
+                  while (nextScheduledRefresh.getTime() <= now) {
+                    nextScheduledRefresh = new Date(nextScheduledRefresh.getTime() + refreshIntervalMs);
+                  }
+                  
+                  const timeUntilNextRefresh = nextScheduledRefresh.getTime() - now;
+                  const hours = Math.floor(timeUntilNextRefresh / (1000 * 60 * 60));
+                  const minutes = Math.floor((timeUntilNextRefresh % (1000 * 60 * 60)) / (1000 * 60));
+                  const seconds = Math.floor((timeUntilNextRefresh % (1000 * 60)) / 1000);
+                  
+                  // Color coding based on time remaining
+                  let color;
+                  if (timeUntilNextRefresh < 5 * 60 * 1000) { // Less than 5 minutes
+                    color = 'red';
+                  } else if (timeUntilNextRefresh < 15 * 60 * 1000) { // Less than 15 minutes
+                    color = 'orange';
+                  } else {
+                    color = 'green';
+                  }
+                  
+                  // Format the countdown display
+                  let countdownText;
+                  if (hours > 0) {
+                    countdownText = hours + 'h ' + minutes + 'm remaining';
+                  } else if (minutes > 0) {
+                    countdownText = minutes + 'm ' + seconds + 's remaining';
+                  } else {
+                    countdownText = seconds + 's remaining';
+                  }
+                  
+                  element.textContent = '⏱️ ' + countdownText;
+                  element.style.color = color;
+                }
+              });
+            }
+            
+            function updateTokenCountdown() {
+              // This function will be called to update the countdown display
+              // We'll refresh the integrations table to show updated times
+              if (currentIntegrationId) {
+                loadIntegrations();
+              }
+            }
           </script>
         </body>
         </html>
