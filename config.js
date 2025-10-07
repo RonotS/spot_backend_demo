@@ -1,4 +1,9 @@
 // Configuration file for Jira Backend Auth Demo
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
 export const config = {
   // Jira OAuth Configuration
   JIRA_CLIENT_ID: process.env.JIRA_CLIENT_ID || 'your_client_id_here',

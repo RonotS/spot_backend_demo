@@ -173,17 +173,33 @@ export class JiraApiService {
 
         // Insert or update issue
         await db.run(`
-          INSERT OR REPLACE INTO jira_issues 
-          (integration_id, project_id, issue_key, summary, assignee, assignee_display_name, 
-           epic_key, epic_name, story_points, status, issue_type, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO jira_issues 
+          (integration_id, project_id, issue_key, issue_id, summary, 
+           assignee_account_id, assignee_display_name, assignee_email,
+           epic_key, epic_name, story_points, status_name, issue_type_name, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(integration_id, issue_key) DO UPDATE SET
+            project_id = excluded.project_id,
+            issue_id = excluded.issue_id,
+            summary = excluded.summary,
+            assignee_account_id = excluded.assignee_account_id,
+            assignee_display_name = excluded.assignee_display_name,
+            assignee_email = excluded.assignee_email,
+            epic_key = excluded.epic_key,
+            epic_name = excluded.epic_name,
+            story_points = excluded.story_points,
+            status_name = excluded.status_name,
+            issue_type_name = excluded.issue_type_name,
+            updated_at = excluded.updated_at
         `, [
           integrationId,
           projectId,
           issue.key,
+          issue.id,
           fields.summary,
-          assigneeEmail,
+          assignee?.accountId || null,
           assigneeName,
+          assigneeEmail,
           epicKey,
           epicName,
           storyPoints,

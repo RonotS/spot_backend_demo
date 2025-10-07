@@ -49,7 +49,8 @@ export async function initDatabase() {
       cloud_id TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, project_key)
     );
 
     CREATE TABLE IF NOT EXISTS jira_issue_types (
@@ -63,7 +64,8 @@ export async function initDatabase() {
       hierarchy_level INTEGER,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, issue_type_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_priorities (
@@ -76,7 +78,8 @@ export async function initDatabase() {
       status_color TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, priority_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_statuses (
@@ -89,7 +92,8 @@ export async function initDatabase() {
       status_category TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, status_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_resolutions (
@@ -100,7 +104,8 @@ export async function initDatabase() {
       description TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, resolution_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_users (
@@ -115,7 +120,8 @@ export async function initDatabase() {
       avatar_urls TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, account_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_groups (
@@ -126,7 +132,8 @@ export async function initDatabase() {
       html TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, group_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_fields (
@@ -145,7 +152,8 @@ export async function initDatabase() {
       schema TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, field_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_labels (
@@ -154,7 +162,8 @@ export async function initDatabase() {
       label_name TEXT,
       usage_count INTEGER,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, label_name)
     );
 
     CREATE TABLE IF NOT EXISTS jira_components (
@@ -168,7 +177,8 @@ export async function initDatabase() {
       assignee_type TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, component_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_versions (
@@ -184,7 +194,8 @@ export async function initDatabase() {
       release_date TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, version_id)
     );
 
     CREATE TABLE IF NOT EXISTS jira_workflows (
@@ -281,7 +292,8 @@ export async function initDatabase() {
       updated TEXT,
       raw_data TEXT,
       updated_at TEXT,
-      FOREIGN KEY (integration_id) REFERENCES integrations (id)
+      FOREIGN KEY (integration_id) REFERENCES integrations (id),
+      UNIQUE(integration_id, issue_key)
     );
 
     CREATE TABLE IF NOT EXISTS jira_comments (

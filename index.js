@@ -1,8 +1,12 @@
+import dotenv from 'dotenv';
 import { initDatabase } from './database.js';
 import { WebServer } from './web-server.js';
 import { TokenRefreshScheduler } from './scheduler.js';
 import { JiraAuthService } from './auth-service.js';
 import './config.js'; // Load configuration
+
+// Load environment variables from .env file
+dotenv.config();
 
 async function main() {
   console.log('🚀 Starting Jira Backend Auth Demo...');

@@ -346,31 +346,39 @@ export class ComprehensiveJiraSync {
   async syncLabels(integrationId) {
     console.log('🏷️ Syncing labels...');
     try {
-      // Use a more specific JQL query to avoid unbounded queries
-      const issues = await this.makeRequest('/search?jql=updated >= -30d ORDER BY updated DESC&maxResults=100');
-      const db = await getDatabase();
-      const labelSet = new Set();
-      
-      for (const issue of issues.issues || []) {
-        if (issue.fields?.labels) {
-          for (const label of issue.fields.labels) {
-            labelSet.add(label);
-          }
+      // Use the dedicated labels endpoint instead of JQL search
+      const response = await fetch(`${this.baseUrl}/rest/api/3/label`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Accept': 'application/json'
         }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Jira API error ${response.status}: ${await response.text()}`);
       }
+
+      const data = await response.json();
+      const labels = data.values || [];
+      const db = await getDatabase();
       
-      for (const label of labelSet) {
+      for (const label of labels) {
         await db.run(`
-          INSERT OR REPLACE INTO jira_labels 
+          INSERT INTO jira_labels 
           (integration_id, label_name, usage_count, updated_at)
           VALUES (?, ?, 1, ?)
+          ON CONFLICT(integration_id, label_name) DO UPDATE SET
+            usage_count = usage_count + 1,
+            updated_at = ?
         `, [
           integrationId,
           label,
+          new Date().toISOString(),
           new Date().toISOString()
         ]);
       }
-      console.log(`✅ Synced ${labelSet.size} labels`);
+      console.log(`✅ Synced ${labels.length} labels`);
     } catch (error) {
       console.warn('⚠️ Could not sync labels:', error.message);
     }
@@ -391,10 +399,18 @@ export class ComprehensiveJiraSync {
         
         for (const component of components) {
           await db.run(`
-            INSERT OR REPLACE INTO jira_components 
+            INSERT INTO jira_components 
             (integration_id, component_id, name, description, project_key, 
              lead_account_id, assignee_type, raw_data, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(integration_id, component_id) DO UPDATE SET
+              name = excluded.name,
+              description = excluded.description,
+              project_key = excluded.project_key,
+              lead_account_id = excluded.lead_account_id,
+              assignee_type = excluded.assignee_type,
+              raw_data = excluded.raw_data,
+              updated_at = excluded.updated_at
           `, [
             integrationId,
             component.id,
@@ -430,10 +446,20 @@ export class ComprehensiveJiraSync {
         
         for (const version of versions) {
           await db.run(`
-            INSERT OR REPLACE INTO jira_versions 
+            INSERT INTO jira_versions 
             (integration_id, version_id, name, description, project_key, 
-             archived, released, release_date, raw_data, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             archived, released, start_date, release_date, raw_data, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(integration_id, version_id) DO UPDATE SET
+              name = excluded.name,
+              description = excluded.description,
+              project_key = excluded.project_key,
+              archived = excluded.archived,
+              released = excluded.released,
+              start_date = excluded.start_date,
+              release_date = excluded.release_date,
+              raw_data = excluded.raw_data,
+              updated_at = excluded.updated_at
           `, [
             integrationId,
             version.id,
@@ -442,6 +468,7 @@ export class ComprehensiveJiraSync {
             project.project_key,
             version.archived || false,
             version.released || false,
+            version.startDate || null,
             version.releaseDate || null,
             JSON.stringify(version),
             new Date().toISOString()
@@ -457,14 +484,29 @@ export class ComprehensiveJiraSync {
 
   /**
    * Sync Workflows
+   * Uses the non-deprecated search endpoint
    */
   async syncWorkflows(integrationId) {
     console.log('🔄 Syncing workflows...');
     try {
-      const workflows = await this.makeRequest('/workflow');
+      // Use the non-deprecated search endpoint instead of the deprecated /workflow
+      const response = await fetch(`${this.baseUrl}/rest/api/3/workflows/search`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Jira API error ${response.status}: ${await response.text()}`);
+      }
+
+      const data = await response.json();
+      const workflows = data.values || data.workflows || [];
       const db = await getDatabase();
       
-      for (const workflow of workflows || []) {
+      for (const workflow of workflows) {
         // Ensure workflow has an id
         const workflowId = workflow.id || `workflow_${Date.now()}_${Math.random()}`;
         
@@ -481,9 +523,13 @@ export class ComprehensiveJiraSync {
           new Date().toISOString()
         ]);
       }
-      console.log(`✅ Synced ${(workflows || []).length} workflows`);
+      console.log(`✅ Synced ${workflows.length} workflows`);
     } catch (error) {
-      console.warn('⚠️ Could not sync workflows (may require admin permissions):', error.message);
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        console.log('ℹ️ Workflows sync skipped - requires Administer Jira permission');
+      } else {
+        console.warn('⚠️ Could not sync workflows:', error.message);
+      }
     }
   }
 
@@ -566,8 +612,22 @@ export class ComprehensiveJiraSync {
       const db = await getDatabase();
       
       // Handle different response formats safely
-      const permissionList = Array.isArray(permissions) ? permissions : 
-                            (permissions.permissions || []);
+      let permissionList = [];
+      if (Array.isArray(permissions)) {
+        permissionList = permissions;
+      } else if (permissions && typeof permissions === 'object') {
+        // Check if permissions has a permissions property
+        if (permissions.permissions && Array.isArray(permissions.permissions)) {
+          permissionList = permissions.permissions;
+        } else if (permissions.permissionList && Array.isArray(permissions.permissionList)) {
+          permissionList = permissions.permissionList;
+        } else {
+          // If it's an object but not the expected format, try to extract values
+          permissionList = Object.values(permissions).filter(item => 
+            item && typeof item === 'object' && item.id
+          );
+        }
+      }
       
       for (const permission of permissionList) {
         await db.run(`
@@ -603,10 +663,29 @@ export class ComprehensiveJiraSync {
     let totalIssues = 0;
     for (const project of projects) {
       try {
-        const issues = await this.makeRequest(`/search/jql?jql=project = "${project.project_key}" ORDER BY updated DESC&maxResults=1000&expand=changelog,comments,worklog,attachments,issuelinks`);
+        // Use the new /rest/api/3/search/jql endpoint
+        const response = await fetch(`${this.baseUrl}/rest/api/3/search/jql`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jql: `project = "${project.project_key}" ORDER BY updated DESC`,
+            maxResults: 1000,
+            expand: 'changelog,comments,worklog,attachments,issuelinks'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Jira API error ${response.status}: ${await response.text()}`);
+        }
+
+        const issues = await response.json();
         
         for (const issue of issues.issues || []) {
-          const fields = issue.fields;
+          const fields = issue.fields || {};
           
           // Extract comprehensive issue data with null safety
           const assignee = fields.assignee || null;
@@ -629,7 +708,7 @@ export class ComprehensiveJiraSync {
           const attachments = fields.attachment || [];
           
           await db.run(`
-            INSERT OR REPLACE INTO jira_issues 
+            INSERT INTO jira_issues 
             (integration_id, project_id, issue_key, issue_id, summary, 
              description, assignee_account_id, assignee_display_name, assignee_email,
              reporter_account_id, reporter_display_name, reporter_email,
@@ -638,7 +717,43 @@ export class ComprehensiveJiraSync {
              resolution_name, resolution_id, labels, components, fix_versions,
              versions, parent_key, subtasks, issuelinks, worklog, comments,
              attachments, created, updated, raw_data, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(integration_id, issue_key) DO UPDATE SET
+              project_id = excluded.project_id,
+              issue_id = excluded.issue_id,
+              summary = excluded.summary,
+              description = excluded.description,
+              assignee_account_id = excluded.assignee_account_id,
+              assignee_display_name = excluded.assignee_display_name,
+              assignee_email = excluded.assignee_email,
+              reporter_account_id = excluded.reporter_account_id,
+              reporter_display_name = excluded.reporter_display_name,
+              reporter_email = excluded.reporter_email,
+              epic_key = excluded.epic_key,
+              epic_name = excluded.epic_name,
+              story_points = excluded.story_points,
+              status_name = excluded.status_name,
+              status_id = excluded.status_id,
+              priority_name = excluded.priority_name,
+              priority_id = excluded.priority_id,
+              issue_type_name = excluded.issue_type_name,
+              issue_type_id = excluded.issue_type_id,
+              resolution_name = excluded.resolution_name,
+              resolution_id = excluded.resolution_id,
+              labels = excluded.labels,
+              components = excluded.components,
+              fix_versions = excluded.fix_versions,
+              versions = excluded.versions,
+              parent_key = excluded.parent_key,
+              subtasks = excluded.subtasks,
+              issuelinks = excluded.issuelinks,
+              worklog = excluded.worklog,
+              comments = excluded.comments,
+              attachments = excluded.attachments,
+              created = excluded.created,
+              updated = excluded.updated,
+              raw_data = excluded.raw_data,
+              updated_at = excluded.updated_at
           `, [
             integrationId,
             project.project_key,
@@ -729,6 +844,7 @@ export class ComprehensiveJiraSync {
 
   /**
    * Sync Issue Worklogs
+   * Uses optimized approach with bulk retrieval and pagination
    */
   async syncIssueWorklogs(integrationId) {
     console.log('⏱️ Syncing issue worklogs...');
@@ -738,31 +854,48 @@ export class ComprehensiveJiraSync {
     let totalWorklogs = 0;
     for (const issue of issues) {
       try {
-        const worklogs = await this.makeRequest(`/issue/${issue.issue_key}/worklog`);
+        // Use pagination to get all worklogs for each issue
+        let startAt = 0;
+        const maxResults = 1000; // Maximum allowed by API
         
-        for (const worklog of worklogs.worklogs || []) {
-          await db.run(`
-            INSERT OR REPLACE INTO jira_worklogs 
-            (integration_id, worklog_id, issue_key, author_account_id, 
-             author_display_name, comment, time_spent, time_spent_seconds,
-             started, created, updated, raw_data, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `, [
-            integrationId,
-            worklog.id,
-            issue.issue_key,
-            worklog.author?.accountId || null,
-            worklog.author?.displayName || null,
-            JSON.stringify(worklog.comment || {}),
-            worklog.timeSpent || null,
-            worklog.timeSpentSeconds || null,
-            worklog.started || null,
-            worklog.created || null,
-            worklog.updated || null,
-            JSON.stringify(worklog),
-            new Date().toISOString()
-          ]);
-          totalWorklogs++;
+        while (true) {
+          const worklogs = await this.makeRequest(`/issue/${issue.issue_key}/worklog?startAt=${startAt}&maxResults=${maxResults}`);
+          
+          if (!worklogs.worklogs || worklogs.worklogs.length === 0) {
+            break;
+          }
+          
+          for (const worklog of worklogs.worklogs) {
+            await db.run(`
+              INSERT OR REPLACE INTO jira_worklogs 
+              (integration_id, worklog_id, issue_key, author_account_id, 
+               author_display_name, comment, time_spent, time_spent_seconds,
+               started, created, updated, raw_data, updated_at)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+              integrationId,
+              worklog.id,
+              issue.issue_key,
+              worklog.author?.accountId || null,
+              worklog.author?.displayName || null,
+              JSON.stringify(worklog.comment || {}),
+              worklog.timeSpent || null,
+              worklog.timeSpentSeconds || null,
+              worklog.started || null,
+              worklog.created || null,
+              worklog.updated || null,
+              JSON.stringify(worklog),
+              new Date().toISOString()
+            ]);
+            totalWorklogs++;
+          }
+          
+          // Check if we've reached the end
+          if (worklogs.worklogs.length < maxResults) {
+            break;
+          }
+          
+          startAt += maxResults;
         }
       } catch (error) {
         console.warn(`⚠️ Could not sync worklogs for issue ${issue.issue_key}:`, error.message);

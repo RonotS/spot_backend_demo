@@ -208,6 +208,227 @@ export class WebServer {
       }
     });
 
+    // Individual sync endpoints
+    this.app.post('/api/integrations/:id/sync/projects', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'projects');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Projects sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/issue-types', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'issue-types');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Issue types sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/priorities', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'priorities');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Priorities sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/statuses', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'statuses');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Statuses sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/resolutions', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'resolutions');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Resolutions sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/users', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'users');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Users sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/groups', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'groups');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Groups sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/fields', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'fields');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Fields sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/labels', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'labels');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Labels sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/components', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'components');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Components sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/versions', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'versions');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Versions sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/workflows', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'workflows');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Workflows sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/dashboards', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'dashboards');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Dashboards sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/filters', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'filters');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Filters sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/permissions', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'permissions');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Permissions sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/issues', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'issues');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Issues sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/comments', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'comments');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Comments sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/worklogs', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'worklogs');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Worklogs sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/attachments', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'attachments');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Attachments sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    this.app.post('/api/integrations/:id/sync/issue-links', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const result = await this.syncIndividualData(parseInt(id), 'issue-links');
+        res.json(result);
+      } catch (error) {
+        console.error('❌ Issue links sync error:', error);
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Token refresh endpoint
     this.app.post('/api/integrations/:id/refresh-token', async (req, res) => {
       try {
@@ -669,9 +890,12 @@ export class WebServer {
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
             th { background-color: #f2f2f2; }
             .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-            .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+            .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid transparent; transition: all 0.3s ease; }
+            .stat-card.clickable { cursor: pointer; }
+            .stat-card.clickable:hover { background: #e9ecef; border-color: #007bff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
             .stat-number { font-size: 2em; font-weight: bold; color: #007bff; }
             .stat-label { color: #666; margin-top: 5px; }
+            .sync-indicator { font-size: 0.8em; margin-top: 5px; font-weight: bold; }
             .raw-data { max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 4px; }
             .json-viewer { background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
             .loading { text-align: center; padding: 20px; }
@@ -707,15 +931,6 @@ export class WebServer {
             
             <div class="card">
               <h2>🔗 Integrations</h2>
-              <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 14px;">
-                <strong>🔄 Auto-Refresh Schedule:</strong>
-                <ul style="margin: 5px 0; padding-left: 20px;">
-                  <li>Token Refresh: Every 30 minutes</li>
-                  <li>Data Sync: Every hour</li>
-                  <li>Health Check: Every 5 minutes</li>
-                </ul>
-                <small style="color: #666;">⏱️ Live countdown timers update every second</small>
-              </div>
               <button class="btn" onclick="loadIntegrations()">Refresh</button>
               <div id="integrations"></div>
             </div>
@@ -896,36 +1111,20 @@ export class WebServer {
                 const response = await fetch(\`/api/integrations?accountId=\${currentIntegrationId}\`);
                 const data = await response.json();
                 
-                let html = '<table><tr><th>ID</th><th>Project</th><th>Status</th><th>Last Refresh</th><th>Next Refresh</th><th>Actions</th></tr>';
+                let html = '<table><tr><th>ID</th><th>Project</th><th>Status</th><th>Last Refresh</th><th>Expires At</th><th>Actions</th></tr>';
                 
                 data.integrations.forEach(integration => {
                   const status = integration.is_active ? 'Active' : 'Inactive';
                   const lastRefresh = integration.last_refresh_at ? new Date(integration.last_refresh_at).toLocaleString() : 'Never';
                   const expiresAt = integration.expires_at ? new Date(integration.expires_at).toLocaleString() : 'Unknown';
+                  const timeUntilExpiry = integration.expires_at ? Math.round((new Date(integration.expires_at) - new Date()) / (1000 * 60 * 60)) : 0;
                   
-                  // Calculate next scheduled refresh based on 30-minute intervals from last refresh
                   let expiryStatus;
-                  let nextRefreshTime;
-                  
-                  if (integration.last_refresh_at) {
-                    const lastRefreshDate = new Date(integration.last_refresh_at);
-                    const lastRefreshMs = lastRefreshDate.getTime();
-                    const refreshIntervalMs = 30 * 60 * 1000; // 30 minutes in milliseconds
-                    
-                    // Calculate the next scheduled refresh time
-                    let nextScheduledRefresh = new Date(lastRefreshMs + refreshIntervalMs);
-                    
-                    // If the next scheduled refresh is in the past, find the next upcoming 30-minute interval
-                    const now = new Date();
-                    while (nextScheduledRefresh <= now) {
-                      nextScheduledRefresh = new Date(nextScheduledRefresh.getTime() + refreshIntervalMs);
-                    }
-                    
-                    expiryStatus = '<span id="countdown-' + integration.id + '" data-last-refresh-ms="' + lastRefreshMs + '" style="color: green">⏱️ Calculating...</span>';
-                    nextRefreshTime = nextScheduledRefresh.toLocaleString();
+                  if (timeUntilExpiry > 0) {
+                    const color = timeUntilExpiry < 2 ? 'red' : timeUntilExpiry < 24 ? 'orange' : 'green';
+                    expiryStatus = '<span style="color: ' + color + '">' + timeUntilExpiry + 'h</span>';
                   } else {
-                    expiryStatus = '<span style="color: gray">No refresh data</span>';
-                    nextRefreshTime = 'Unknown';
+                    expiryStatus = '<span style="color: red">Expired</span>';
                   }
                   
                   html += \`<tr>
@@ -933,7 +1132,7 @@ export class WebServer {
                     <td>\${integration.project_id}</td>
                     <td>\${status}</td>
                     <td>\${lastRefresh}</td>
-                    <td>\${nextRefreshTime}<br><small>\${expiryStatus}</small></td>
+                    <td>\${expiresAt}<br><small>\${expiryStatus}</small></td>
                     <td>
                       <button class="btn" onclick="refreshToken(\${integration.id})">🔄 Refresh Token</button>
                       <button class="btn" onclick="syncIntegration(\${integration.id})">Quick Sync</button>
@@ -1058,12 +1257,37 @@ export class WebServer {
                   'jira_issue_links': 'Issue Links'
                 };
                 
+                const syncEndpoints = {
+                  'jira_projects': 'projects',
+                  'jira_issues': 'issues',
+                  'jira_users': 'users',
+                  'jira_issue_types': 'issue-types',
+                  'jira_priorities': 'priorities',
+                  'jira_statuses': 'statuses',
+                  'jira_resolutions': 'resolutions',
+                  'jira_groups': 'groups',
+                  'jira_fields': 'fields',
+                  'jira_labels': 'labels',
+                  'jira_components': 'components',
+                  'jira_versions': 'versions',
+                  'jira_workflows': 'workflows',
+                  'jira_dashboards': 'dashboards',
+                  'jira_filters': 'filters',
+                  'jira_permissions': 'permissions',
+                  'jira_comments': 'comments',
+                  'jira_worklogs': 'worklogs',
+                  'jira_attachments': 'attachments',
+                  'jira_issue_links': 'issue-links'
+                };
+                
                 for (const [table, count] of Object.entries(data.stats)) {
                   const displayName = tableNames[table] || table;
+                  const syncEndpoint = syncEndpoints[table];
                   html += \`
-                    <div class="stat-card">
+                    <div class="stat-card clickable" onclick="syncIndividualData('\${syncEndpoint}', '\${displayName}')" title="Click to sync \${displayName}">
                       <div class="stat-number">\${count}</div>
                       <div class="stat-label">\${displayName}</div>
+                      <div class="sync-indicator" id="sync-\${syncEndpoint}"></div>
                     </div>
                   \`;
                 }
@@ -1073,6 +1297,49 @@ export class WebServer {
               } catch (error) {
                 document.getElementById('stats-container').innerHTML = 
                   '<div class="status error">❌ ' + error.message + '</div>';
+              }
+            }
+            
+            async function syncIndividualData(endpoint, displayName) {
+              if (!currentIntegrationId) {
+                alert('Please select an account first');
+                return;
+              }
+              
+              const indicator = document.getElementById(\`sync-\${endpoint}\`);
+              if (indicator) {
+                indicator.innerHTML = '🔄 Syncing...';
+                indicator.style.color = '#007bff';
+              }
+              
+              try {
+                const response = await fetch(\`/api/integrations/\${currentIntegrationId}/sync/\${endpoint}\`, { 
+                  method: 'POST' 
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                  if (indicator) {
+                    indicator.innerHTML = '✅ Synced';
+                    indicator.style.color = '#28a745';
+                  }
+                  // Refresh the stats to show updated counts
+                  setTimeout(() => {
+                    loadStats(currentIntegrationId);
+                  }, 1000);
+                } else {
+                  if (indicator) {
+                    indicator.innerHTML = '❌ Failed';
+                    indicator.style.color = '#dc3545';
+                  }
+                  alert(\`Sync failed for \${displayName}: \${data.error}\`);
+                }
+              } catch (error) {
+                if (indicator) {
+                  indicator.innerHTML = '❌ Error';
+                  indicator.style.color = '#dc3545';
+                }
+                alert(\`Sync error for \${displayName}: \${error.message}\`);
               }
             }
             
@@ -1119,70 +1386,131 @@ export class WebServer {
             
             // Load current account and account-specific data on page load
             loadCurrentAccount();
-            
-            // Start live countdown timer
-            setInterval(updateLiveCountdowns, 1000); // Update every second for live countdown
-            setInterval(updateTokenCountdown, 30000); // Update data every 30 seconds
-            
-            function updateLiveCountdowns() {
-              // Update all countdown elements without rebuilding the table
-              const countdownElements = document.querySelectorAll('[id^="countdown-"]');
-              
-              countdownElements.forEach(element => {
-                const lastRefreshMs = parseInt(element.getAttribute('data-last-refresh-ms'));
-                if (lastRefreshMs) {
-                  const now = new Date().getTime();
-                  const refreshIntervalMs = 30 * 60 * 1000; // 30 minutes
-                  
-                  // Calculate next scheduled refresh
-                  let nextScheduledRefresh = new Date(lastRefreshMs + refreshIntervalMs);
-                  while (nextScheduledRefresh.getTime() <= now) {
-                    nextScheduledRefresh = new Date(nextScheduledRefresh.getTime() + refreshIntervalMs);
-                  }
-                  
-                  const timeUntilNextRefresh = nextScheduledRefresh.getTime() - now;
-                  const hours = Math.floor(timeUntilNextRefresh / (1000 * 60 * 60));
-                  const minutes = Math.floor((timeUntilNextRefresh % (1000 * 60 * 60)) / (1000 * 60));
-                  const seconds = Math.floor((timeUntilNextRefresh % (1000 * 60)) / 1000);
-                  
-                  // Color coding based on time remaining
-                  let color;
-                  if (timeUntilNextRefresh < 5 * 60 * 1000) { // Less than 5 minutes
-                    color = 'red';
-                  } else if (timeUntilNextRefresh < 15 * 60 * 1000) { // Less than 15 minutes
-                    color = 'orange';
-                  } else {
-                    color = 'green';
-                  }
-                  
-                  // Format the countdown display
-                  let countdownText;
-                  if (hours > 0) {
-                    countdownText = hours + 'h ' + minutes + 'm remaining';
-                  } else if (minutes > 0) {
-                    countdownText = minutes + 'm ' + seconds + 's remaining';
-                  } else {
-                    countdownText = seconds + 's remaining';
-                  }
-                  
-                  element.textContent = '⏱️ ' + countdownText;
-                  element.style.color = color;
-                }
-              });
-            }
-            
-            function updateTokenCountdown() {
-              // This function will be called to update the countdown display
-              // We'll refresh the integrations table to show updated times
-              if (currentIntegrationId) {
-                loadIntegrations();
-              }
-            }
           </script>
         </body>
         </html>
       `);
     });
+  }
+
+  async syncIndividualData(integrationId, dataType) {
+    try {
+      const db = await getDatabase();
+      
+      // Get integration details
+      const integration = await db.get('SELECT * FROM integrations WHERE id = ?', [integrationId]);
+      if (!integration) {
+        return { success: false, error: 'Integration not found' };
+      }
+
+      // Get the real cloud ID from Jira API
+      const { JiraApiService } = await import('./jira-api.js');
+      const apiService = new JiraApiService(integration.access_token);
+      const resources = await apiService.getAccessibleResources();
+      
+      if (resources.length === 0) {
+        return { success: false, error: 'No accessible Jira resources found' };
+      }
+      
+      // Use the first accessible resource
+      const cloudId = resources[0].id;
+      console.log(`🔍 Using cloud ID: ${cloudId}`);
+      
+      const { ComprehensiveJiraSync } = await import('./comprehensive-sync.js');
+      const syncService = new ComprehensiveJiraSync(integration.access_token, cloudId);
+      
+      let result = { success: true, message: '', count: 0 };
+      
+      switch (dataType) {
+        case 'projects':
+          await syncService.syncProjects(integrationId);
+          result.message = 'Projects synced successfully';
+          break;
+        case 'issue-types':
+          await syncService.syncIssueTypes(integrationId);
+          result.message = 'Issue types synced successfully';
+          break;
+        case 'priorities':
+          await syncService.syncPriorities(integrationId);
+          result.message = 'Priorities synced successfully';
+          break;
+        case 'statuses':
+          await syncService.syncStatuses(integrationId);
+          result.message = 'Statuses synced successfully';
+          break;
+        case 'resolutions':
+          await syncService.syncResolutions(integrationId);
+          result.message = 'Resolutions synced successfully';
+          break;
+        case 'users':
+          await syncService.syncUsers(integrationId);
+          result.message = 'Users synced successfully';
+          break;
+        case 'groups':
+          await syncService.syncGroups(integrationId);
+          result.message = 'Groups synced successfully';
+          break;
+        case 'fields':
+          await syncService.syncFields(integrationId);
+          result.message = 'Fields synced successfully';
+          break;
+        case 'labels':
+          await syncService.syncLabels(integrationId);
+          result.message = 'Labels synced successfully';
+          break;
+        case 'components':
+          await syncService.syncComponents(integrationId);
+          result.message = 'Components synced successfully';
+          break;
+        case 'versions':
+          await syncService.syncVersions(integrationId);
+          result.message = 'Versions synced successfully';
+          break;
+        case 'workflows':
+          await syncService.syncWorkflows(integrationId);
+          result.message = 'Workflows synced successfully';
+          break;
+        case 'dashboards':
+          await syncService.syncDashboards(integrationId);
+          result.message = 'Dashboards synced successfully';
+          break;
+        case 'filters':
+          await syncService.syncFilters(integrationId);
+          result.message = 'Filters synced successfully';
+          break;
+        case 'permissions':
+          await syncService.syncPermissions(integrationId);
+          result.message = 'Permissions synced successfully';
+          break;
+        case 'issues':
+          await syncService.syncIssuesComprehensive(integrationId);
+          result.message = 'Issues synced successfully';
+          break;
+        case 'comments':
+          await syncService.syncIssueComments(integrationId);
+          result.message = 'Comments synced successfully';
+          break;
+        case 'worklogs':
+          await syncService.syncIssueWorklogs(integrationId);
+          result.message = 'Worklogs synced successfully';
+          break;
+        case 'attachments':
+          await syncService.syncIssueAttachments(integrationId);
+          result.message = 'Attachments synced successfully';
+          break;
+        case 'issue-links':
+          await syncService.syncIssueLinks(integrationId);
+          result.message = 'Issue links synced successfully';
+          break;
+        default:
+          return { success: false, error: 'Unknown data type' };
+      }
+      
+      return result;
+    } catch (error) {
+      console.error(`❌ Individual sync error for ${dataType}:`, error);
+      return { success: false, error: error.message };
+    }
   }
 
   start() {

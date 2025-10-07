@@ -35,8 +35,7 @@ export class JiraAuthService {
       redirect_uri: this.redirectUri,
       state: state,
       response_type: 'code',
-      prompt: 'consent',
-      access_type: 'offline'
+      prompt: 'consent'
     });
 
     return `https://auth.atlassian.com/authorize?${params.toString()}`;
